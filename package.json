@@ -1,0 +1,32 @@
+{
+  "name": "action-tag-semver",
+  "version": "1.0.0",
+  "description": "Hello world!",
+  "main": "index.js",
+  "scripts": {
+    "build": "swc src/* -d dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgoraSystems/action-tag-semver.git"
+  },
+  "author": "Kojo Technologies, Inc.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AgoraSystems/action-tag-semver/issues"
+  },
+  "homepage": "https://github.com/AgoraSystems/action-tag-semver#readme",
+  "dependencies": {
+    "@actions/core": "^1.9.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^5.0.3",
+    "semver": "^7.3.7"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.246",
+    "@types/node": "^16.11.56",
+    "@types/semver": "^7.3.12"
+  }
+}

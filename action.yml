@@ -1,0 +1,24 @@
+name: 'Tag New Semantic Version'
+description: "Determine's the next semantic version based on PR labels and existing git tags, and creates a new git tag"
+inputs:
+  github-token:
+    description: 'GitHub Access token, typically passed in with `secrets.GITHUB_TOKEN`.'
+    required: true
+  major-labels:
+    description: 'Comma-separated list of labels that will cause a major version bump.'
+    required: true
+    default: 'major'
+  minor-labels:
+    description: 'Comma-separated list of labels that will cause a minor version bump.'
+    required: true
+    default: 'minor'
+  version-prefix:
+    description: 'Prefix to use for git tags (for example: "v").'
+    required: true
+    default: ''
+outputs:
+  version:
+    description: 'The new semantic version'
+runs:
+  using: 'node16'
+  main: 'index.js'
