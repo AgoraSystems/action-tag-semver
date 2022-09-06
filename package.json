@@ -2,7 +2,7 @@
   "name": "action-tag-semver",
   "version": "1.0.0",
   "description": "Hello world!",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "swc src/* -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
