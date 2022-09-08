@@ -13858,7 +13858,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     if (!newVersion) {
         throw new Error('Failed to increment version');
     }
-    console.log('Most recent version tag on `main`:', mostRecentVersion);
+    console.log('Most recent version tag on `main`:', mostRecentVersion.version);
     console.log('Release type:', releaseType);
     console.log('New computed version:', newVersion);
     // Create a tag with the new release
@@ -13915,7 +13915,7 @@ const semver = __importStar(__nccwpck_require__(1383));
 const string_1 = __nccwpck_require__(1380);
 // Ensures local git tags are up-to-date
 const fetchTags = () => __awaiter(void 0, void 0, void 0, function* () {
-    const exitCode = yield exec.exec('git', ['tag', '--no-column', '--merged']);
+    const exitCode = yield exec.exec('git', ['fetch', '--tags', '--quiet']);
     if (exitCode != 0) {
         process.exit(exitCode);
     }

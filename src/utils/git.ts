@@ -6,7 +6,7 @@ import { removePrefix } from './string';
 
 // Ensures local git tags are up-to-date
 const fetchTags = async () => {
-  const exitCode = await exec.exec('git', ['tag', '--no-column', '--merged']);
+  const exitCode = await exec.exec('git', ['fetch', '--tags', '--quiet']);
   if (exitCode != 0) {
     process.exit(exitCode);
   }

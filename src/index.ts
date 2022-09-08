@@ -20,7 +20,7 @@ const main = async () => {
   if (!newVersion) {
     throw new Error('Failed to increment version');
   }
-  console.log('Most recent version tag on `main`:', mostRecentVersion);
+  console.log('Most recent version tag on `main`:', mostRecentVersion.version);
   console.log('Release type:', releaseType);
   console.log('New computed version:', newVersion);
 
