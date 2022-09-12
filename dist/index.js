@@ -13863,8 +13863,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('New computed version:', newVersion);
     // Create and push a tag with the new release
     const newVersionString = options.versionPrefix + newVersion;
-    yield (0, git_1.createTag)(newVersionString);
-    yield (0, git_1.pushTag)(newVersionString);
+    yield (0, github_1.createTag)(octokit, newVersionString);
     core.setOutput('version', newVersionString);
 });
 main().catch((error) => {
@@ -13912,7 +13911,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pushTag = exports.createTag = exports.getMostRecentVersion = void 0;
+exports.getMostRecentVersion = void 0;
 const exec = __importStar(__nccwpck_require__(1514));
 const semver = __importStar(__nccwpck_require__(1383));
 const string_1 = __nccwpck_require__(1380);
@@ -13938,20 +13937,6 @@ const getMostRecentVersion = (options) => __awaiter(void 0, void 0, void 0, func
     return versions[0] || semver.parse('0.0.0');
 });
 exports.getMostRecentVersion = getMostRecentVersion;
-const createTag = (version) => __awaiter(void 0, void 0, void 0, function* () {
-    const exitCode = yield exec.exec('git', ['tag', version]);
-    if (exitCode != 0) {
-        process.exit(exitCode);
-    }
-});
-exports.createTag = createTag;
-const pushTag = (version) => __awaiter(void 0, void 0, void 0, function* () {
-    const exitCode = yield exec.exec('git', ['push', 'origin', version]);
-    if (exitCode != 0) {
-        process.exit(exitCode);
-    }
-});
-exports.pushTag = pushTag;
 
 
 /***/ }),
@@ -13993,7 +13978,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPullRequestLabels = exports.getOctokit = void 0;
+exports.getPullRequestLabels = exports.createTag = exports.getOctokit = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const getOctokit = () => {
@@ -14001,6 +13986,11 @@ const getOctokit = () => {
     return github.getOctokit(token);
 };
 exports.getOctokit = getOctokit;
+const createTag = (octokit, version) => __awaiter(void 0, void 0, void 0, function* () {
+    const ref = `refs/tags/${version}`;
+    yield octokit.rest.git.createRef(Object.assign(Object.assign({}, github.context.repo), { sha: github.context.sha, ref }));
+});
+exports.createTag = createTag;
 const getPullRequestLabels = (octokit, options) => __awaiter(void 0, void 0, void 0, function* () {
     const pullRequests = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit(Object.assign(Object.assign({}, github.context.repo), { commit_sha: github.context.sha }));
     return pullRequests.data.flatMap((pr) => pr.labels.map((label) => label.name));

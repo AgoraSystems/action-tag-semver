@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import { createTag, getMostRecentVersion, pushTag } from './utils/git';
-import { getOctokit } from './utils/github';
+import { getMostRecentVersion } from './utils/git';
+import { createTag, getOctokit } from './utils/github';
 import { getOptions } from './utils/options';
 import { getReleaseType } from './utils/release';
 
@@ -26,8 +26,7 @@ const main = async () => {
 
   // Create and push a tag with the new release
   const newVersionString = options.versionPrefix + newVersion;
-  await createTag(newVersionString);
-  await pushTag(newVersionString);
+  await createTag(octokit, newVersionString);
   core.setOutput('version', newVersionString);
 };
 
