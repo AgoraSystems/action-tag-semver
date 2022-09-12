@@ -13862,8 +13862,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Release type:', releaseType);
     console.log('New computed version:', newVersion);
     // Create and push a tag with the new release
-    yield (0, git_1.createTag)(options.versionPrefix + newVersion);
-    yield (0, git_1.pushTags)();
+    const newVersionString = options.versionPrefix + newVersion;
+    yield (0, git_1.createTag)(newVersionString);
+    yield (0, git_1.pushTag)(newVersionString);
 });
 main().catch((error) => {
     console.error(error);
@@ -13910,7 +13911,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.pushTags = exports.createTag = exports.getMostRecentVersion = void 0;
+exports.pushTag = exports.createTag = exports.getMostRecentVersion = void 0;
 const exec = __importStar(__nccwpck_require__(1514));
 const semver = __importStar(__nccwpck_require__(1383));
 const string_1 = __nccwpck_require__(1380);
@@ -13943,13 +13944,13 @@ const createTag = (version) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.createTag = createTag;
-const pushTags = () => __awaiter(void 0, void 0, void 0, function* () {
-    const exitCode = yield exec.exec('git', ['push', '--tags']);
+const pushTag = (version) => __awaiter(void 0, void 0, void 0, function* () {
+    const exitCode = yield exec.exec('git', ['push', 'origin', version]);
     if (exitCode != 0) {
         process.exit(exitCode);
     }
 });
-exports.pushTags = pushTags;
+exports.pushTag = pushTag;
 
 
 /***/ }),

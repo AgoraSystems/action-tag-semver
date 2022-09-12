@@ -37,8 +37,8 @@ export const createTag = async (version: string) => {
   }
 };
 
-export const pushTags = async () => {
-  const exitCode = await exec.exec('git', ['push', '--tags']);
+export const pushTag = async (version: string) => {
+  const exitCode = await exec.exec('git', ['push', 'origin', version]);
   if (exitCode != 0) {
     process.exit(exitCode);
   }
