@@ -15,7 +15,7 @@ const fetchTags = async () => {
 export const getMostRecentVersion = async (options: Options) => {
   await fetchTags();
 
-  const { exitCode, stdout } = await exec.getExecOutput('git', ['tag', '--no-column', '--merged']);
+  const { exitCode, stdout } = await exec.getExecOutput('git', ['tag', '--no-column']);
   if (exitCode != 0) {
     process.exit(exitCode);
   }

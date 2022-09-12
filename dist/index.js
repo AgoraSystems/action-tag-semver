@@ -13922,7 +13922,7 @@ const fetchTags = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 const getMostRecentVersion = (options) => __awaiter(void 0, void 0, void 0, function* () {
     yield fetchTags();
-    const { exitCode, stdout } = yield exec.getExecOutput('git', ['tag', '--no-column', '--merged']);
+    const { exitCode, stdout } = yield exec.getExecOutput('git', ['tag', '--no-column']);
     if (exitCode != 0) {
         process.exit(exitCode);
     }
