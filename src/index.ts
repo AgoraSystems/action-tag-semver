@@ -28,6 +28,7 @@ const main = async () => {
   const newVersionString = options.versionPrefix + newVersion;
   await createTag(newVersionString);
   await pushTag(newVersionString);
+  core.setOutput('version', newVersionString);
 };
 
 main().catch((error: Error) => {

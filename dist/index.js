@@ -13865,6 +13865,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const newVersionString = options.versionPrefix + newVersion;
     yield (0, git_1.createTag)(newVersionString);
     yield (0, git_1.pushTag)(newVersionString);
+    core.setOutput('version', newVersionString);
 });
 main().catch((error) => {
     console.error(error);
