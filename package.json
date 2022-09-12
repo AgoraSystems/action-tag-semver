@@ -13,7 +13,7 @@
     "url": "git+https://github.com/AgoraSystems/action-tag-semver.git"
   },
   "author": "Kojo Technologies, Inc.",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AgoraSystems/action-tag-semver/issues"
   },
