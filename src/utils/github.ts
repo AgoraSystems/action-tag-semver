@@ -24,5 +24,12 @@ export const getPullRequestLabels = async (octokit: Octokit, options: Options) =
     ...github.context.repo,
     commit_sha: github.context.sha,
   });
-  return pullRequests.data.flatMap((pr) => pr.labels.map((label) => label.name));
+  return pullRequests.data.flatMap((pr) => {
+    const labels = pr.labels.map((label) => label.name);
+    console.log(`PR #${pr.number} has labels:`);
+    for (const label of labels) {
+      console.log(`- ${label}`);
+    }
+    return labels;
+  });
 };

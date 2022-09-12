@@ -13993,7 +13993,14 @@ const createTag = (octokit, version) => __awaiter(void 0, void 0, void 0, functi
 exports.createTag = createTag;
 const getPullRequestLabels = (octokit, options) => __awaiter(void 0, void 0, void 0, function* () {
     const pullRequests = yield octokit.rest.repos.listPullRequestsAssociatedWithCommit(Object.assign(Object.assign({}, github.context.repo), { commit_sha: github.context.sha }));
-    return pullRequests.data.flatMap((pr) => pr.labels.map((label) => label.name));
+    return pullRequests.data.flatMap((pr) => {
+        const labels = pr.labels.map((label) => label.name);
+        console.log(`PR #${pr.number} has labels:`);
+        for (const label of labels) {
+            console.log(`- ${label}`);
+        }
+        return labels;
+    });
 });
 exports.getPullRequestLabels = getPullRequestLabels;
 
