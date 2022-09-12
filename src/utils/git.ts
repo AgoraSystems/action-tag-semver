@@ -29,3 +29,17 @@ export const getMostRecentVersion = async (options: Options) => {
 
   return versions[0] || semver.parse('0.0.0');
 };
+
+export const createTag = async (version: string) => {
+  const exitCode = await exec.exec('git', ['tag', version]);
+  if (exitCode != 0) {
+    process.exit(exitCode);
+  }
+};
+
+export const pushTags = async () => {
+  const exitCode = await exec.exec('git', ['push', '--tags']);
+  if (exitCode != 0) {
+    process.exit(exitCode);
+  }
+};

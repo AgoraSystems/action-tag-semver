@@ -10,15 +10,6 @@ export const getOctokit = () => {
   return github.getOctokit(token);
 };
 
-export const createTag = async (octokit: Octokit, version: string) => {
-  const ref = `refs/tags/${version}`;
-  await octokit.rest.git.createRef({
-    ...github.context.repo,
-    sha: github.context.sha,
-    ref,
-  });
-};
-
 export const getPullRequestLabels = async (octokit: Octokit, options: Options) => {
   const pullRequests = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
     ...github.context.repo,

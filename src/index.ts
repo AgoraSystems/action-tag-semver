@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import { getMostRecentVersion } from './utils/git';
-import { createTag, getOctokit } from './utils/github';
+import { createTag, getMostRecentVersion, pushTags } from './utils/git';
+import { getOctokit } from './utils/github';
 import { getOptions } from './utils/options';
 import { getReleaseType } from './utils/release';
 
@@ -24,8 +24,9 @@ const main = async () => {
   console.log('Release type:', releaseType);
   console.log('New computed version:', newVersion);
 
-  // Create a tag with the new release
-  await createTag(octokit, options.versionPrefix + newVersion);
+  // Create and push a tag with the new release
+  await createTag(options.versionPrefix + newVersion);
+  await pushTags();
 };
 
 main().catch((error: Error) => {
