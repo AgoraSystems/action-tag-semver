@@ -1,7 +1,7 @@
-# Tag SemVer
+# Tag New Semantic Version Action
 
-This GitHub Action determine's the next semantic version based on PR labels and existing git tags,
-then creates a new git tag with that version as the name.
+This GitHub Action determine's the next semantic version based on PR labels and existing git tags in
+your repository, then creates a new git tag with the computed version at the current commit.
 
 This action is designed to be used in a workflow triggered by a pull request being merged. If a pull
 request is not found for the commit that triggered the workflow, the action will always create a
@@ -20,7 +20,15 @@ will default to creating a new patch version.
 ## Action Outputs
 - **version**: The newly created version number.
 
-## Example
+## Usage Example
+
+In the example below, pull requests merged to main will trigger a version bump. If the pull request:
+- has a `major` or `breaking` label, then a new major version will be created.
+- has a `minor` or `schema-change` label, then a new minor version will be created.
+- does not have any of the above labels, then a new patch version will be created.
+
+The "Success!" step is not necessary, it is just here to show an example of using the output of this
+action in a later step.
 
 ```yml
 name: Create SemVer Tag
@@ -35,12 +43,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Create new version and tag
-        id: create-version
+      - name: Tag new semantic version
+        id: tag-new-semver
         uses: AgoraSystems/action-tag-semver@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           major-labels: "major,breaking"
           minor-labels: "minor,schema-change"
           version-prefix: "v"
+      - name: Success
+        run: echo "Created new version ${{ steps.tag-new-semver.outputs.version }}"
 ```
