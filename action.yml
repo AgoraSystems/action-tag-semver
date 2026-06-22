@@ -16,6 +16,14 @@ inputs:
     description: 'Prefix to use for git tags (for example: "v").'
     required: true
     default: ''
+  version-scheme:
+    description: 'Versioning scheme to use: "semver" (3-segment, default) or "four-segment" (MAJOR.MINOR.PATCH.HOTFIX for release/** and hotfix/** branches).'
+    required: false
+    default: 'semver'
+  branch-name:
+    description: 'The branch name used to determine hotfix/release context. Required when version-scheme is four-segment.'
+    required: false
+    default: ''
 outputs:
   version:
     description: 'The new semantic version'
