@@ -13466,9 +13466,34 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 1618:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.extractBase = exports.computeFourSegmentVersion = exports.isHotfixOrReleaseBranch = exports.compareFourSegment = exports.parseFourSegment = void 0;
 /**
  * Four-segment versioning: MAJOR.MINOR.PATCH.HOTFIX
  *
@@ -13476,41 +13501,18 @@ function wrappy (fn, cb) {
  * Emit 3-segment from main (when version-scheme=four-segment).
  *
  * All comparisons are integer-based (no lexicographic ordering).
+ * Tags arrive already prefix-stripped (stripped by getRawTags in git.ts).
  */
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.extractBase = exports.computeFourSegmentVersion = exports.isHotfixOrReleaseBranch = exports.compareThreeSegment = exports.compareFourSegment = exports.parseThreeSegment = exports.parseFourSegment = exports.isThreeSegment = exports.isFourSegment = void 0;
-/** Returns true if the tag string is a valid 4-segment version. */
-const isFourSegment = (tag) => {
-    const parts = tag.split('.');
-    if (parts.length !== 4)
-        return false;
-    return parts.every((p) => /^\d+$/.test(p));
-};
-exports.isFourSegment = isFourSegment;
-/** Returns true if the tag string is a valid 3-segment version. */
-const isThreeSegment = (tag) => {
-    const parts = tag.split('.');
-    if (parts.length !== 3)
-        return false;
-    return parts.every((p) => /^\d+$/.test(p));
-};
-exports.isThreeSegment = isThreeSegment;
+const semver = __importStar(__nccwpck_require__(1383));
 /** Parse a 4-segment tag string. Returns null if invalid. */
 const parseFourSegment = (tag) => {
-    if (!(0, exports.isFourSegment)(tag))
+    const parts = tag.split('.');
+    if (parts.length !== 4 || !parts.every((p) => /^\d+$/.test(p)))
         return null;
-    const [major, minor, patch, hotfix] = tag.split('.').map(Number);
+    const [major, minor, patch, hotfix] = parts.map(Number);
     return { major, minor, patch, hotfix };
 };
 exports.parseFourSegment = parseFourSegment;
-/** Parse a 3-segment tag string. Returns null if invalid. */
-const parseThreeSegment = (tag) => {
-    if (!(0, exports.isThreeSegment)(tag))
-        return null;
-    const [major, minor, patch] = tag.split('.').map(Number);
-    return { major, minor, patch };
-};
-exports.parseThreeSegment = parseThreeSegment;
 /** Integer comparator for 4-segment versions. Returns negative, 0, or positive. */
 const compareFourSegment = (a, b) => {
     if (a.major !== b.major)
@@ -13522,23 +13524,14 @@ const compareFourSegment = (a, b) => {
     return a.hotfix - b.hotfix;
 };
 exports.compareFourSegment = compareFourSegment;
-/** Integer comparator for 3-segment versions. Returns negative, 0, or positive. */
-const compareThreeSegment = (a, b) => {
-    if (a.major !== b.major)
-        return a.major - b.major;
-    if (a.minor !== b.minor)
-        return a.minor - b.minor;
-    return a.patch - b.patch;
-};
-exports.compareThreeSegment = compareThreeSegment;
 /** True if branch is a hotfix or release branch. */
 const isHotfixOrReleaseBranch = (branchName) => {
     return branchName.startsWith('release/') || branchName.startsWith('hotfix/');
 };
 exports.isHotfixOrReleaseBranch = isHotfixOrReleaseBranch;
 /**
- * Given a list of raw tag strings (with prefix already removed), compute the
- * next four-segment version for the given branch.
+ * Given a list of prefix-stripped tag strings, compute the next four-segment
+ * version for the given branch.
  *
  * On hotfix/** or release/** branches:
  *   - Derives the base (MAJOR.MINOR.PATCH) from the branch name.
@@ -13547,7 +13540,7 @@ exports.isHotfixOrReleaseBranch = isHotfixOrReleaseBranch;
  *   - Throws if the base 3-seg tag does not exist in the tag list.
  *
  * On main (when version-scheme=four-segment):
- *   - Finds the highest 3-seg tag, increments PATCH, returns 3-segment.
+ *   - Finds the highest 3-seg tag, increments MINOR, returns 3-segment.
  *
  * Throws on invalid branch name for four-segment mode.
  */
@@ -13562,41 +13555,47 @@ const computeFourSegmentVersion = (rawTags, branchName, versionPrefix) => {
 };
 exports.computeFourSegmentVersion = computeFourSegmentVersion;
 const computeMainVersion = (rawTags, versionPrefix) => {
-    const stripped = rawTags.map((t) => t.startsWith(versionPrefix) ? t.slice(versionPrefix.length) : t);
-    const threeSeg = stripped
-        .map(exports.parseThreeSegment)
-        .filter((v) => v !== null)
-        .sort((a, b) => (0, exports.compareThreeSegment)(b, a)); // descending
-    if (threeSeg.length === 0) {
+    // Tags are already prefix-stripped; find the highest valid 3-segment tag via semver
+    const highest = rawTags.reduce((max, t) => {
+        const v = semver.parse(t);
+        if (!v)
+            return max;
+        return max === null || semver.gt(v, max) ? v : max;
+    }, null);
+    if (!highest) {
         return `${versionPrefix}0.1.0`;
     }
     // On main with four-segment mode, bump MINOR (starting a new release line).
     // Example from spec: 1.3.0 → 1.4.0 (spec Section 5, case 3).
-    const highest = threeSeg[0];
     return `${versionPrefix}${highest.major}.${highest.minor + 1}.0`;
 };
 const computeHotfixVersion = (rawTags, branchName, versionPrefix) => {
     const base = (0, exports.extractBase)(branchName);
-    const stripped = rawTags.map((t) => t.startsWith(versionPrefix) ? t.slice(versionPrefix.length) : t);
-    // Check that the base 3-seg tag exists (anchor requirement)
-    const baseExists = stripped.some((t) => t === base);
+    // Single pass: check base exists + collect matching 4-seg tags
+    let baseExists = false;
+    let maxFourSeg = null;
+    for (const t of rawTags) {
+        if (t === base) {
+            baseExists = true;
+            continue;
+        }
+        const v = (0, exports.parseFourSegment)(t);
+        if (v && `${v.major}.${v.minor}.${v.patch}` === base) {
+            if (maxFourSeg === null || (0, exports.compareFourSegment)(v, maxFourSeg) > 0) {
+                maxFourSeg = v;
+            }
+        }
+    }
     if (!baseExists) {
         throw new Error(`four-segment mode requires a base 3-segment tag "${versionPrefix}${base}" to exist. ` +
             `No such tag found. Cannot anchor hotfix version. ` +
-            `Available tags: ${stripped.slice(0, 10).join(', ')}`);
+            `Available tags: ${rawTags.slice(0, 10).join(', ')}`);
     }
-    // Find all 4-seg tags with the same MAJOR.MINOR.PATCH base
-    const fourSegForBase = stripped
-        .map(exports.parseFourSegment)
-        .filter((v) => v !== null)
-        .filter((v) => `${v.major}.${v.minor}.${v.patch}` === base)
-        .sort((a, b) => (0, exports.compareFourSegment)(b, a)); // descending
-    if (fourSegForBase.length === 0) {
+    if (maxFourSeg === null) {
         // No existing 4-seg tags for this base — start at .1
         return `${versionPrefix}${base}.1`;
     }
-    const highest = fourSegForBase[0];
-    return `${versionPrefix}${highest.major}.${highest.minor}.${highest.patch}.${highest.hotfix + 1}`;
+    return `${versionPrefix}${maxFourSeg.major}.${maxFourSeg.minor}.${maxFourSeg.patch}.${maxFourSeg.hotfix + 1}`;
 };
 /**
  * Extract the MAJOR.MINOR.PATCH base from a branch name.
@@ -13670,9 +13669,6 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const options = (0, options_1.getOptions)();
     const octokit = (0, github_1.getOctokit)();
     if (options.versionScheme === 'four-segment') {
-        if (!options.branchName) {
-            throw new Error('branch-name input is required when version-scheme is four-segment');
-        }
         const newVersionString = yield (0, git_1.getNextFourSegmentVersion)(options);
         console.log('Version scheme: four-segment');
         console.log('Branch:', options.branchName);
@@ -13754,27 +13750,7 @@ const fetchTags = () => __awaiter(void 0, void 0, void 0, function* () {
         process.exit(exitCode);
     }
 });
-const getMostRecentVersion = (options) => __awaiter(void 0, void 0, void 0, function* () {
-    yield fetchTags();
-    const { exitCode, stdout } = yield exec.getExecOutput('git', ['tag', '--no-column']);
-    if (exitCode != 0) {
-        process.exit(exitCode);
-    }
-    const versions = stdout
-        .split('\n')
-        .map((version) => (0, string_1.removePrefix)(version, options.versionPrefix))
-        .map((version) => semver.parse(version))
-        .filter((version) => version !== null)
-        .sort(semver.rcompare);
-    return versions[0] || semver.parse('0.0.0');
-});
-exports.getMostRecentVersion = getMostRecentVersion;
-/**
- * Returns the raw list of tags from git (prefix-stripped).
- * Used by the four-segment path to avoid semver.parse filtering.
- */
-const getRawTags = (options) => __awaiter(void 0, void 0, void 0, function* () {
-    yield fetchTags();
+const listRawTags = () => __awaiter(void 0, void 0, void 0, function* () {
     const { exitCode, stdout } = yield exec.getExecOutput('git', ['tag', '--no-column']);
     if (exitCode != 0) {
         process.exit(exitCode);
@@ -13783,6 +13759,24 @@ const getRawTags = (options) => __awaiter(void 0, void 0, void 0, function* () {
         .split('\n')
         .map((t) => t.trim())
         .filter((t) => t.length > 0);
+});
+const getMostRecentVersion = (options) => __awaiter(void 0, void 0, void 0, function* () {
+    yield fetchTags();
+    const versions = (yield listRawTags())
+        .map((version) => (0, string_1.removePrefix)(version, options.versionPrefix))
+        .map((version) => semver.parse(version))
+        .filter((version) => version !== null)
+        .sort(semver.rcompare);
+    return versions[0] || semver.parse('0.0.0');
+});
+exports.getMostRecentVersion = getMostRecentVersion;
+/**
+ * Returns prefix-stripped tags from git.
+ * Used by the four-segment path to avoid semver.parse filtering.
+ */
+const getRawTags = (options) => __awaiter(void 0, void 0, void 0, function* () {
+    yield fetchTags();
+    return (yield listRawTags()).map((t) => (0, string_1.removePrefix)(t, options.versionPrefix));
 });
 exports.getRawTags = getRawTags;
 /**

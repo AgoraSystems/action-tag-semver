@@ -12,10 +12,6 @@ const main = async () => {
   const octokit = getOctokit();
 
   if (options.versionScheme === 'four-segment') {
-    if (!options.branchName) {
-      throw new Error('branch-name input is required when version-scheme is four-segment');
-    }
-
     const newVersionString = await getNextFourSegmentVersion(options);
     console.log('Version scheme: four-segment');
     console.log('Branch:', options.branchName);

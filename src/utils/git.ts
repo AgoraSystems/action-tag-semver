@@ -13,16 +13,21 @@ const fetchTags = async () => {
   }
 };
 
-export const getMostRecentVersion = async (options: Options) => {
-  await fetchTags();
-
+const listRawTags = async (): Promise<string[]> => {
   const { exitCode, stdout } = await exec.getExecOutput('git', ['tag', '--no-column']);
   if (exitCode != 0) {
     process.exit(exitCode);
   }
-
-  const versions = stdout
+  return stdout
     .split('\n')
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0);
+};
+
+export const getMostRecentVersion = async (options: Options) => {
+  await fetchTags();
+
+  const versions = (await listRawTags())
     .map((version) => removePrefix(version, options.versionPrefix))
     .map((version) => semver.parse(version))
     .filter((version): version is semver.SemVer => version !== null)
@@ -32,21 +37,12 @@ export const getMostRecentVersion = async (options: Options) => {
 };
 
 /**
- * Returns the raw list of tags from git (prefix-stripped).
+ * Returns prefix-stripped tags from git.
  * Used by the four-segment path to avoid semver.parse filtering.
  */
 export const getRawTags = async (options: Options): Promise<string[]> => {
   await fetchTags();
-
-  const { exitCode, stdout } = await exec.getExecOutput('git', ['tag', '--no-column']);
-  if (exitCode != 0) {
-    process.exit(exitCode);
-  }
-
-  return stdout
-    .split('\n')
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0);
+  return (await listRawTags()).map((t) => removePrefix(t, options.versionPrefix));
 };
 
 /**
