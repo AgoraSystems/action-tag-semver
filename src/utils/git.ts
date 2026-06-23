@@ -3,7 +3,7 @@ import * as semver from 'semver';
 
 import type { Options } from './options';
 import { removePrefix } from './string';
-import { computeFourSegmentVersion } from '../four-segment';
+import { computeFourSegmentVersion, filterTagsByPrefix } from '../four-segment';
 
 // Ensures local git tags are up-to-date
 const fetchTags = async () => {
@@ -37,12 +37,14 @@ export const getMostRecentVersion = async (options: Options) => {
 };
 
 /**
- * Returns prefix-stripped tags from git.
+ * Returns prefix-stripped tags from git, filtered to only those carrying the
+ * configured versionPrefix. Tags without the prefix are excluded.
+ * When versionPrefix is '' (the default), all tags pass through unchanged.
  * Used by the four-segment path to avoid semver.parse filtering.
  */
 export const getRawTags = async (options: Options): Promise<string[]> => {
   await fetchTags();
-  return (await listRawTags()).map((t) => removePrefix(t, options.versionPrefix));
+  return filterTagsByPrefix(await listRawTags(), options.versionPrefix);
 };
 
 /**

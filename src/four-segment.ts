@@ -9,6 +9,13 @@
  */
 import * as semver from 'semver';
 
+/**
+ * Filter raw git tags to those carrying the configured prefix, then strip it.
+ * When versionPrefix is '' (the default), all tags pass (startsWith('') is always true).
+ */
+export const filterTagsByPrefix = (rawTags: string[], versionPrefix: string): string[] =>
+  rawTags.filter((t) => t.startsWith(versionPrefix)).map((t) => t.slice(versionPrefix.length));
+
 export interface FourSegment {
   major: number;
   minor: number;

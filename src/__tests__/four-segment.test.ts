@@ -4,6 +4,7 @@ import {
   isHotfixOrReleaseBranch,
   extractBase,
   computeFourSegmentVersion,
+  filterTagsByPrefix,
 } from '../four-segment.js';
 
 // ---------------------------------------------------------------------------
@@ -156,5 +157,53 @@ describe('extractBase', () => {
 
   it('throws on non-version after slash', () => {
     expect(() => extractBase('hotfix/no-version-here')).toThrow(/does not start with MAJOR.MINOR.PATCH/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterTagsByPrefix — prefix filter applied by getRawTags before four-segment
+// ---------------------------------------------------------------------------
+
+describe('filterTagsByPrefix', () => {
+  it('with prefix "v": excludes unprefixed tags, strips prefix from matching tags', () => {
+    const raw = ['v1.3.0', '2.0.0', 'v1.3.0.1', 'unrelated-thing'];
+    expect(filterTagsByPrefix(raw, 'v')).toEqual(['1.3.0', '1.3.0.1']);
+  });
+
+  it('with prefix "": all tags pass through unchanged (default behavior preserved)', () => {
+    const raw = ['1.3.0', '2.0.0', '1.3.0.1'];
+    expect(filterTagsByPrefix(raw, '')).toEqual(['1.3.0', '2.0.0', '1.3.0.1']);
+  });
+
+  it('with prefix "v": mixed tag repo — unprefixed "2.0.0" does not become wrong base', () => {
+    // Simulates a repo where some tags have "v" prefix and some don't.
+    // Before the fix, "2.0.0" would survive prefix-stripping unchanged and
+    // pollute the tag list seen by computeHotfixVersion / computeMainVersion.
+    const raw = ['v1.3.0', '2.0.0'];
+    const filtered = filterTagsByPrefix(raw, 'v');
+    expect(filtered).toContain('1.3.0');
+    expect(filtered).not.toContain('2.0.0');
+  });
+
+  it('with prefix "v": filtered result feeds computeFourSegmentVersion without false missing-base', () => {
+    // hotfix/1.3.0-x requires "1.3.0" in the tag list.
+    // Raw git tags: ['v1.3.0', '2.0.0']. After filter: ['1.3.0'].
+    // Without the fix, '2.0.0' would appear in rawTags and not match the base,
+    // but '1.3.0' would still be present — the real danger is the converse:
+    // if versionPrefix='v' and only '2.0.0' were present (no 'v1.3.0'), the
+    // base would be missing. Confirm the filtered list gives the correct result.
+    const raw = ['v1.3.0', '2.0.0'];
+    const filtered = filterTagsByPrefix(raw, 'v');
+    expect(computeFourSegmentVersion(filtered, 'hotfix/1.3.0-x', 'v')).toBe('v1.3.0.1');
+  });
+
+  it('with prefix "v": only unprefixed tags → base missing → throws (not wrong base)', () => {
+    // If the repo has only '2.0.0' (no 'v' prefix) and prefix is 'v',
+    // filtered list is empty → missing base → correct throw, not a wrong-base silent bug.
+    const raw = ['2.0.0'];
+    const filtered = filterTagsByPrefix(raw, 'v');
+    expect(() => computeFourSegmentVersion(filtered, 'hotfix/1.3.0-x', 'v')).toThrow(
+      /base 3-segment tag.*1\.3\.0.*to exist/,
+    );
   });
 });

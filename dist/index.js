@@ -13493,7 +13493,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.extractBase = exports.computeFourSegmentVersion = exports.isHotfixOrReleaseBranch = exports.compareFourSegment = exports.parseFourSegment = void 0;
+exports.extractBase = exports.computeFourSegmentVersion = exports.isHotfixOrReleaseBranch = exports.compareFourSegment = exports.parseFourSegment = exports.filterTagsByPrefix = void 0;
 /**
  * Four-segment versioning: MAJOR.MINOR.PATCH.HOTFIX
  *
@@ -13504,6 +13504,12 @@ exports.extractBase = exports.computeFourSegmentVersion = exports.isHotfixOrRele
  * Tags arrive already prefix-stripped (stripped by getRawTags in git.ts).
  */
 const semver = __importStar(__nccwpck_require__(1383));
+/**
+ * Filter raw git tags to those carrying the configured prefix, then strip it.
+ * When versionPrefix is '' (the default), all tags pass (startsWith('') is always true).
+ */
+const filterTagsByPrefix = (rawTags, versionPrefix) => rawTags.filter((t) => t.startsWith(versionPrefix)).map((t) => t.slice(versionPrefix.length));
+exports.filterTagsByPrefix = filterTagsByPrefix;
 /** Parse a 4-segment tag string. Returns null if invalid. */
 const parseFourSegment = (tag) => {
     const parts = tag.split('.');
@@ -13771,12 +13777,14 @@ const getMostRecentVersion = (options) => __awaiter(void 0, void 0, void 0, func
 });
 exports.getMostRecentVersion = getMostRecentVersion;
 /**
- * Returns prefix-stripped tags from git.
+ * Returns prefix-stripped tags from git, filtered to only those carrying the
+ * configured versionPrefix. Tags without the prefix are excluded.
+ * When versionPrefix is '' (the default), all tags pass through unchanged.
  * Used by the four-segment path to avoid semver.parse filtering.
  */
 const getRawTags = (options) => __awaiter(void 0, void 0, void 0, function* () {
     yield fetchTags();
-    return (yield listRawTags()).map((t) => (0, string_1.removePrefix)(t, options.versionPrefix));
+    return (0, four_segment_1.filterTagsByPrefix)(yield listRawTags(), options.versionPrefix);
 });
 exports.getRawTags = getRawTags;
 /**
