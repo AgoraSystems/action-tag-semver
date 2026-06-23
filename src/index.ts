@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as semver from 'semver';
 
-import { getMostRecentVersion } from './utils/git';
+import { getMostRecentVersion, getNextFourSegmentVersion } from './utils/git';
 import { createTag, getOctokit } from './utils/github';
 import { getOptions } from './utils/options';
 import { getReleaseType } from './utils/release';
@@ -11,7 +11,18 @@ const main = async () => {
   const options = getOptions();
   const octokit = getOctokit();
 
-  // Determine the version for the next release
+  if (options.versionScheme === 'four-segment') {
+    const newVersionString = await getNextFourSegmentVersion(options);
+    console.log('Version scheme: four-segment');
+    console.log('Branch:', options.branchName);
+    console.log('New computed version:', newVersionString);
+
+    await createTag(octokit, newVersionString);
+    core.setOutput('version', newVersionString);
+    return;
+  }
+
+  // --- Existing semver path (unchanged) ---
   const [mostRecentVersion, releaseType] = await Promise.all([
     getMostRecentVersion(options),
     getReleaseType(octokit, options),
@@ -24,7 +35,6 @@ const main = async () => {
   console.log('Release type:', releaseType);
   console.log('New computed version:', newVersion);
 
-  // Create and push a tag with the new release
   const newVersionString = options.versionPrefix + newVersion;
   await createTag(octokit, newVersionString);
   core.setOutput('version', newVersionString);
